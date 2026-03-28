@@ -3,6 +3,7 @@ node_modules/
 result
 .direnv/
 .claude/
+analysis/
 *.js
 !cli.js
 *.md

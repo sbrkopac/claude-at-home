@@ -81,36 +81,9 @@ When backporting from newer Claude Code versions:
 
 All new functions/variables added by us use the `athome_` prefix. This distinguishes our additions from Anthropic's mangled names, making them grep-able and avoiding collisions.
 
-## Known Fixes
+## Our Modifications
 
-**Non-TTY stdin hang (`fd7`, line ~445959):** Upstream `fd7()` awaits stdin `end` indefinitely when `!process.stdin.isTTY`. This hangs when spawned from `child_process` (e.g. Claude Code's Bash tool) because the pipe never closes.
+See `analysis/architecture.md` for detailed internals (variable mappings, line numbers, data flow). The `analysis/` directory is gitignored — local reference only.
 
-This is an unsolvable problem in Node.js — there is [no API to distinguish](https://github.com/nodejs/node/issues/2339) "spawned with a pipe that has no data" from "pipe with data coming soon":
-
-- `isTTY` is `false` for both `echo foo | node app` and `child_process.exec("node app")`
-- `fstatSync(0).size` returns [0 for pipes regardless of data](https://github.com/nodejs/node/issues/43669)
-- `fstatSync(0).isFIFO()` is `true` for both cases
-- `readableLength` is 0 until you start reading
-
-Fix: 100ms timeout — if `-p` has a prompt and no stdin data arrives in 100ms, skip stdin. This is the standard Node.js pattern ([get-stdin uses the same approach](https://github.com/sindresorhus/get-stdin/issues/13)). The `end` listener is registered **before** the timeout to avoid race conditions with fast pipes like `echo foo | claude -p bar`. The only timeout-free alternative would be to never read stdin when `-p` has a prompt, which breaks the `echo context | claude -p "summarize"` concatenation feature.
-
-## Per-Source Token Tracking
-
-Tracks token usage per source (main thread vs agents) and displays it in the info bar.
-
-### Architecture
-
-1. **State** (`Tj9()` init, line ~1974): `DQ.sourceUsage = {}` and `DQ.agentTypeMap = new Map`
-2. **Agent type recording** (`LVA()`, line ~408821): `DQ.agentTypeMap.set(F, A.agentType)` maps agent ID to type
-3. **Token accumulation** (`hz0()`, line ~2048): 4th arg `Z` (source label) accumulates into `DQ.sourceUsage[Y]` where `Y = Z || "main"`
-4. **Source lookup** (line ~432742): `SnA(VA, j, Y.model, DQ.agentTypeMap.get(Y.agentIdOrSessionId))` resolves agent type at token report time
-5. **Display** (line ~383903): `athome_getSourceUsage()` returns `DQ.sourceUsage`, rendered in info bar
-
-### Display modes
-
-- **Default**: Shows "main" + aggregated "agents" rows only when agents are active
-- **Detailed** (`CLAUDE_TOKEN_LOG=1`): Shows per-agent-type breakdown (Explore, Plan, etc.) plus stderr token log
-
-### Agent spawning behavior
-
-The LLM may proactively spawn Explore/Plan agents even for simple messages. This is driven by system prompt instructions ("use agents proactively") and is non-deterministic. The token display is accurate — these tokens are genuinely spent. The aggregated "agents" display avoids confusing users who didn't explicitly request agent usage.
+- **Non-TTY stdin hang fix**: 100ms timeout in stdin reader to prevent hang when spawned without TTY
+- **Per-source token tracking**: Info bar shows main vs agent token usage. Set `CLAUDE_TOKEN_LOG=1` for detailed per-agent breakdown
