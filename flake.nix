@@ -40,6 +40,10 @@
           default = claude-at-home;
           claude-at-home = claude-at-home;
         };
+
+        devShells.default = pkgs.mkShell {
+          buildInputs = [ pkgs.nodejs_22 pkgs.bc ];
+        };
       }
     );
 }

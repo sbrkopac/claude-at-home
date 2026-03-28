@@ -61,13 +61,17 @@ These must not be modified without explicit instruction:
 
 For a permanent PATH install, add this flake as an input to your NixOS or Home Manager config.
 
-`nix develop` does **not** put the binary in PATH — it only provides development tooling.
+`nix develop` does **not** put the binary in PATH — it only provides development tooling (`node`, `npx`, `bc`). Run `nix develop` before using `bash scripts/minify.sh` or other node-dependent commands.
 
 ### Maintenance
 
 If you add, remove, or rename files referenced in `installPhase` (the `cp` lines in `flake.nix`), the build will break. Always verify with `nix run .` after changing tracked files.
 
 The version string is `2.0.61-athome.1` in `flake.nix` — bump the `-athome.N` suffix for local releases.
+
+## Session Bloat
+
+The Edit tool stores the full `originalFile` in `toolUseResult` for undo support. Editing the ~17MB beautified file produces ~17MB per edit in the session log. Heavy editing sessions can grow to hundreds of MB, causing OOM crashes on `--continue`/`--resume`. If this happens, delete the oversized `.jsonl` files in `~/.claude/projects/`.
 
 ## Backporting Features
 
