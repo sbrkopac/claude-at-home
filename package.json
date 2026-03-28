@@ -1,6 +1,6 @@
 {
-  "name": "diet-claude",
-  "version": "2.0.61",
+  "name": "claude-at-home",
+  "version": "2.0.61-athome.1",
   "bin": {
     "claude": "cli.js"
   },
@@ -8,12 +8,12 @@
     "node": ">=18.0.0"
   },
   "type": "module",
-  "author": "Anthropic <support@anthropic.com>",
+  "author": "Sam Brkopac",
   "license": "SEE LICENSE IN README.md",
-  "description": "Use Claude, Anthropic's AI assistant, right from your terminal. Claude can understand your codebase, edit files, run terminal commands, and handle entire workflows for you.",
-  "homepage": "https://github.com/anthropics/claude-code",
+  "description": "Mom said we have Claude Code at home. Claude Code at home:",
+  "homepage": "https://github.com/sbrkopac/claude-at-home",
   "bugs": {
-    "url": "https://github.com/anthropics/claude-code/issues"
+    "url": "https://github.com/sbrkopac/claude-at-home/issues"
   },
   "scripts": {
     "prepare": "node -e \"if (!process.env.AUTHORIZED) { console.error('ERROR: Direct publishing is not allowed.\\nPlease use the publish-external.sh script to publish this package.'); process.exit(1); }\""
