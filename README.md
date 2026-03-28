@@ -28,14 +28,6 @@ nix run .
 
 Requires an Anthropic API key or Claude subscription.
 
-## Reporting Bugs
-
-File a [GitHub issue](https://github.com/sbrkopac/claude-at-home/issues) or use the `/bug` command within the CLI. The `/bug` command also submits feedback to Anthropic's API using your credentials — telemetry localization is planned.
-
-## Telemetry
-
-The upstream Claude Code CLI sends analytics (Statsig), crash reports (Sentry), and performance metrics to Anthropic. This fork currently inherits that behavior.
-
 ## Based on
 
 [Claude Code](https://github.com/anthropics/claude-code) by Anthropic.
