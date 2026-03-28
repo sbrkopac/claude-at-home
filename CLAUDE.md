@@ -71,7 +71,16 @@ The version string is `2.0.61-athome.1` in `flake.nix` — bump the `-athome.N` 
 
 ## Session Bloat
 
-The Edit tool stores the full `originalFile` in `toolUseResult` for undo support. Editing the ~17MB beautified file produces ~17MB per edit in the session log. Heavy editing sessions can grow to hundreds of MB, causing OOM crashes on `--continue`/`--resume`. If this happens, delete the oversized `.jsonl` files in `~/.claude/projects/`.
+Mitigated by several `athome_` patches:
+
+- **originalFile cap** (`athome_capOriginalFile`): Edit/Write tool results cap the `originalFile` field at 50KB, keeping context around the edit. Undo still works via `file-history-snapshot`.
+- **Tool result size cap** (`athome_capToolResultData`): All `toolUseResult` entries in `.jsonl` are capped at 100KB total; individual string fields at 30KB.
+- **Compaction stripping** (`athome_stripForCompaction`): Tool results in messages sent to the compaction summarizer are truncated to 2KB.
+- **Stat-based session loading** (`athome_readSessionMetadata`): Resume picker reads only file head/tail (8KB each) instead of parsing entire `.jsonl` files.
+- **Streaming buffer cleanup**: Interrupted streams release ReadableStream and response references.
+- **Bounded session maps** (`athome_BoundedMap`): Session message/summary/title maps have size limits (50K/5K/1K entries) with LRU eviction.
+
+If sessions still grow too large, delete oversized `.jsonl` files in `~/.claude/projects/`.
 
 ## Backporting Features
 
@@ -91,3 +100,5 @@ See `analysis/architecture.md` for detailed internals (variable mappings, line n
 
 - **Non-TTY stdin hang fix**: 100ms timeout in stdin reader to prevent hang when spawned without TTY
 - **Per-source token tracking**: Info bar shows main vs agent token usage. Set `CLAUDE_TOKEN_LOG=1` for detailed per-agent breakdown
+- **Memory leak fixes**: originalFile cap, tool result cap, compaction stripping, stat-based session loading, streaming cleanup, bounded maps (see Session Bloat section)
+- **ToolSearch / Lazy Tool Loading**: Defers loading of non-essential tools via `defer_loading: true` and adds `tool_search_tool_regex` schema. Controlled by `ENABLE_TOOL_SEARCH` env var (`true`/`false`/`auto:N` where N is context % threshold). Only works with firstParty provider, excludes haiku models.
