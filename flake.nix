@@ -40,11 +40,6 @@
           default = claude-at-home;
           claude-at-home = claude-at-home;
         };
-
-        apps.default = {
-          type = "app";
-          program = "${claude-at-home}/bin/claude-at-home";
-        };
       }
     );
 }

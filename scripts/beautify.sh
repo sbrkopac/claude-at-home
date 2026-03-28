@@ -2,11 +2,14 @@
 set -euo pipefail
 cd "$(dirname "$0")/.."
 
-if [ -f cli-beautified.js ]; then
-  echo "cli-beautified.js already exists. Delete it first to re-beautify."
+HASH=$(git rev-parse --short HEAD)
+OUTFILE="/tmp/cli-beautified-${HASH}.js"
+
+if [ -f "$OUTFILE" ]; then
+  echo "$OUTFILE already exists. Delete it first to re-beautify."
   exit 1
 fi
 
-npx terser cli.js --module --no-rename --beautify -o cli-beautified.js
-echo "Created cli-beautified.js ($(wc -l < cli-beautified.js) lines)"
-echo "Edit cli-beautified.js, then run scripts/minify.sh before committing."
+npx js-beautify cli.js -o "$OUTFILE"
+echo "Created $OUTFILE ($(wc -l < "$OUTFILE") lines)"
+echo "Edit $OUTFILE, then run scripts/minify.sh before committing."

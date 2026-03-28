@@ -2,12 +2,15 @@
 set -euo pipefail
 cd "$(dirname "$0")/.."
 
-if [ ! -f cli-beautified.js ]; then
-  echo "cli-beautified.js not found. Run scripts/beautify.sh first."
+HASH=$(git rev-parse --short HEAD)
+EXPECTED="/tmp/cli-beautified-${HASH}.js"
+
+if [ ! -f "$EXPECTED" ]; then
+  echo "$EXPECTED not found. Run scripts/beautify.sh first."
   exit 1
 fi
 
-npx terser cli-beautified.js --module --no-rename -o cli.js
+npx terser "$EXPECTED" --module --no-rename -o cli.js
 node --check cli.js
-echo "Minified cli-beautified.js -> cli.js ($(wc -l < cli.js) lines, $(wc -c < cli.js) bytes)"
+echo "Minified $EXPECTED -> cli.js ($(wc -l < cli.js) lines, $(wc -c < cli.js) bytes)"
 echo "cli.js is ready to commit."

@@ -3,7 +3,9 @@ node_modules/
 result
 .direnv/
 .claude/
-cli-beautified.js
+*.js
+!cli.js
 *.md
 !README.md
 !LICENSE.md
+!CLAUDE.md
